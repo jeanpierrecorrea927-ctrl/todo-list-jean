@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List | DevOps</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>📝 To-Do List</h1>
+      <p class="subtitle">Despliegue Automatizado en VPS</p>
+    </header>
+
+    <section class="task-form-section">
+      <form id="task-form">
+        <input type="text" id="title-input" placeholder="Título de la tarea" required>
+        <input type="text" id="description-input" placeholder="Descripción (opcional)">
+        <button type="submit" id="submit-btn">Agregar</button>
+        <button type="button" id="cancel-edit-btn" class="hidden">Cancelar</button>
+      </form>
+    </section>
+
+    <section class="filter-section">
+      <input type="text" id="filter-input" placeholder="🔍 Filtrar tareas en tiempo real...">
+    </section>
+
+    <section class="tasks-section">
+      <ul id="task-list"></ul>
+      <p id="empty-state" class="hidden">No hay tareas todavía.</p>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
