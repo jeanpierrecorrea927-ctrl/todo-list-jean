@@ -3,6 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const { body, param, validationResult } = require('express-validator');
 
 // GET /api/tasks -> listar todas las tareas (soporta ?q= para filtrar en el servidor también)
 router.get('/', async (req, res) => {
@@ -10,9 +11,11 @@ router.get('/', async (req, res) => {
     const { q } = req.query;
     let result;
     if (q) {
+      // Sanitizar el parámetro de búsqueda
+      const sanitizedQuery = q.trim().slice(0, 100); // Limitar longitud
       result = await pool.query(
         'SELECT * FROM tasks WHERE title ILIKE $1 ORDER BY created_at DESC',
-        [`%${q}%`]
+        [`%${sanitizedQuery}%`]
       );
     } else {
       result = await pool.query('SELECT * FROM tasks ORDER BY created_at DESC');
@@ -25,8 +28,15 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/tasks/:id -> obtener una tarea específica
-router.get('/:id', async (req, res) => {
+router.get('/:id', [
+  param('id').isInt().withMessage('ID debe ser un entero')
+], async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const { id } = req.params;
     const result = await pool.query('SELECT * FROM tasks WHERE id = $1', [id]);
     if (result.rows.length === 0) {
@@ -40,12 +50,24 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/tasks -> crear una nueva tarea
-router.post('/', async (req, res) => {
+router.post('/', [
+  body('title')
+    .trim()
+    .notEmpty().withMessage('El título es obligatorio')
+    .isLength({ max: 255 }).withMessage('El título no puede exceder 255 caracteres')
+    .escape(),
+  body('description')
+    .optional()
+    .trim()
+    .escape()
+], async (req, res) => {
   try {
-    const { title, description } = req.body;
-    if (!title || title.trim() === '') {
-      return res.status(400).json({ error: 'El título es obligatorio' });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
+
+    const { title, description } = req.body;
     const result = await pool.query(
       'INSERT INTO tasks (title, description) VALUES ($1, $2) RETURNING *',
       [title, description || null]
@@ -58,8 +80,28 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /api/tasks/:id -> actualizar una tarea (título, descripción, completado)
-router.put('/:id', async (req, res) => {
+router.put('/:id', [
+  param('id').isInt().withMessage('ID debe ser un entero'),
+  body('title')
+    .optional()
+    .trim()
+    .notEmpty().withMessage('El título no puede estar vacío')
+    .isLength({ max: 255 }).withMessage('El título no puede exceder 255 caracteres')
+    .escape(),
+  body('description')
+    .optional()
+    .trim()
+    .escape(),
+  body('completed')
+    .optional()
+    .isBoolean().withMessage('completed debe ser un booleano')
+], async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const { id } = req.params;
     const { title, description, completed } = req.body;
 
@@ -75,9 +117,9 @@ router.put('/:id', async (req, res) => {
        WHERE id = $4
        RETURNING *`,
       [
-        title ?? current.title,
-        description ?? current.description,
-        completed ?? current.completed,
+        title !== undefined ? title : current.title,
+        description !== undefined ? description : current.description,
+        completed !== undefined ? completed : current.completed,
         id,
       ]
     );
@@ -89,8 +131,15 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE /api/tasks/:id -> eliminar una tarea
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', [
+  param('id').isInt().withMessage('ID debe ser un entero')
+], async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const { id } = req.params;
     const result = await pool.query('DELETE FROM tasks WHERE id = $1 RETURNING *', [id]);
     if (result.rows.length === 0) {
