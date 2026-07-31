@@ -1,7 +1,11 @@
 // db.js
 // Configuración del pool de conexiones a PostgreSQL
 const { Pool } = require('pg');
-require('dotenv').config();
+
+// Cargar variables de entorno solo si no estamos en Docker
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
