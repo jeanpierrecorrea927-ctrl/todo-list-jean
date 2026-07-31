@@ -17,6 +17,9 @@ RUN cd backend && npm install --production
 COPY backend ./backend
 COPY public ./public
 
+# Copiar el archivo .env del backend si existe (opcional)
+COPY backend/.env ./backend/.env
+
 WORKDIR /app/backend
 
 EXPOSE 3000
