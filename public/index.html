@@ -4,97 +4,292 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>To-Do List | DevOps</title>
-
-  <link rel="stylesheet" href="style.css?v=4">
+  <title>To-Do List</title>
 
   <style>
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      min-height: 100%;
-      background-color: #000000 !important;
-      color: #ffffff !important;
+    * {
+      box-sizing: border-box;
     }
 
     body {
+      margin: 0;
       min-height: 100vh;
+      background: #000;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 30px;
     }
 
     .app {
-      min-height: 100vh;
-      background-color: #000000 !important;
-      color: #ffffff;
+      max-width: 700px;
+      margin: auto;
+      background: #171717;
+      padding: 25px;
+      border-radius: 12px;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     input {
-      background-color: #1a1a1a;
-      color: #ffffff;
-      border: 1px solid #444444;
+      flex: 1;
+      min-width: 180px;
+      padding: 12px;
+      background: #292929;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 6px;
     }
 
-    input::placeholder {
-      color: #aaaaaa;
+    button {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #submit-btn {
+      background: #19a35b;
+      color: white;
+    }
+
+    #cancel-edit-btn {
+      background: #777;
+      color: white;
+    }
+
+    #filter-input {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #252525;
+      margin-top: 12px;
+      padding: 15px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    li p {
+      margin: 6px 0 0;
+      color: #bbb;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .edit-btn {
+      background: #e3a008;
+      color: black;
+    }
+
+    .delete-btn {
+      background: #d32f2f;
+      color: white;
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 
 <body>
-  <div class="app">
-
-    <header class="app-header">
+  <main class="app">
+    <header>
       <h1>📝 To-Do List</h1>
-      <p class="subtitle">Despliegue Automatizado en VPS</p>
+      <p>Despliegue Automatizado en VPS</p>
     </header>
 
-    <section class="task-form-section">
-      <form id="task-form">
-        <input
-          type="text"
-          id="title-input"
-          placeholder="Título de la tarea"
-          required
-        >
-
-        <input
-          type="text"
-          id="description-input"
-          placeholder="Descripción (opcional)"
-        >
-
-        <button type="submit" id="submit-btn">
-          Agregar
-        </button>
-
-        <button
-          type="button"
-          id="cancel-edit-btn"
-          class="hidden"
-        >
-          Cancelar
-        </button>
-      </form>
-    </section>
-
-    <section class="filter-section">
+    <form id="task-form">
       <input
         type="text"
-        id="filter-input"
-        placeholder="🔍 Filtrar tareas en tiempo real..."
+        id="title-input"
+        placeholder="Título de la tarea"
+        required
       >
-    </section>
 
-    <section class="tasks-section">
-      <ul id="task-list"></ul>
+      <input
+        type="text"
+        id="description-input"
+        placeholder="Descripción opcional"
+      >
 
-      <p id="empty-state" class="hidden">
-        No hay tareas todavía.
-      </p>
-    </section>
+      <button type="submit" id="submit-btn">
+        Agregar
+      </button>
 
-  </div>
+      <button
+        type="button"
+        id="cancel-edit-btn"
+        class="hidden"
+      >
+        Cancelar
+      </button>
+    </form>
 
-  <script src="app.js"></script>
+    <input
+      type="text"
+      id="filter-input"
+      placeholder="🔍 Filtrar tareas..."
+    >
+
+    <ul id="task-list"></ul>
+
+    <p id="empty-state">
+      No hay tareas todavía.
+    </p>
+  </main>
+
+  <script>
+    const taskForm = document.getElementById("task-form");
+    const titleInput = document.getElementById("title-input");
+    const descriptionInput =
+      document.getElementById("description-input");
+    const taskList = document.getElementById("task-list");
+    const emptyState = document.getElementById("empty-state");
+    const filterInput = document.getElementById("filter-input");
+    const submitBtn = document.getElementById("submit-btn");
+    const cancelEditBtn =
+      document.getElementById("cancel-edit-btn");
+
+    let tasks = JSON.parse(localStorage.getItem("todoTasks")) || [];
+    let editingId = null;
+
+    function saveTasks() {
+      localStorage.setItem("todoTasks", JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = "";
+
+      const filter = filterInput.value.toLowerCase().trim();
+
+      const filteredTasks = tasks.filter((task) =>
+        task.title.toLowerCase().includes(filter) ||
+        task.description.toLowerCase().includes(filter)
+      );
+
+      emptyState.classList.toggle(
+        "hidden",
+        filteredTasks.length > 0
+      );
+
+      filteredTasks.forEach((task) => {
+        const li = document.createElement("li");
+
+        const content = document.createElement("div");
+
+        const title = document.createElement("strong");
+        title.textContent = task.title;
+
+        const description = document.createElement("p");
+        description.textContent =
+          task.description || "Sin descripción";
+
+        content.appendChild(title);
+        content.appendChild(description);
+
+        const actions = document.createElement("div");
+        actions.className = "task-actions";
+
+        const editButton = document.createElement("button");
+        editButton.textContent = "Editar";
+        editButton.className = "edit-btn";
+
+        editButton.addEventListener("click", () => {
+          editingId = task.id;
+          titleInput.value = task.title;
+          descriptionInput.value = task.description;
+
+          submitBtn.textContent = "Guardar";
+          cancelEditBtn.classList.remove("hidden");
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Eliminar";
+        deleteButton.className = "delete-btn";
+
+        deleteButton.addEventListener("click", () => {
+          tasks = tasks.filter((item) => item.id !== task.id);
+
+          saveTasks();
+          renderTasks();
+        });
+
+        actions.appendChild(editButton);
+        actions.appendChild(deleteButton);
+
+        li.appendChild(content);
+        li.appendChild(actions);
+
+        taskList.appendChild(li);
+      });
+    }
+
+    taskForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const title = titleInput.value.trim();
+      const description = descriptionInput.value.trim();
+
+      if (!title) {
+        return;
+      }
+
+      if (editingId !== null) {
+        const task = tasks.find((item) => item.id === editingId);
+
+        if (task) {
+          task.title = title;
+          task.description = description;
+        }
+      } else {
+        tasks.push({
+          id: Date.now(),
+          title,
+          description
+        });
+      }
+
+      saveTasks();
+
+      editingId = null;
+      taskForm.reset();
+      submitBtn.textContent = "Agregar";
+      cancelEditBtn.classList.add("hidden");
+
+      renderTasks();
+    });
+
+    cancelEditBtn.addEventListener("click", () => {
+      editingId = null;
+      taskForm.reset();
+      submitBtn.textContent = "Agregar";
+      cancelEditBtn.classList.add("hidden");
+    });
+
+    filterInput.addEventListener("input", renderTasks);
+
+    renderTasks();
+  </script>
 </body>
 </html>
