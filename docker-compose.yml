@@ -27,16 +27,18 @@ services:
       dockerfile: backend/Dockerfile
     container_name: todo-app
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      PORT: ${PORT:-3000}
+      PORT: ${PORT}
       # OJO: DB_HOST es "db" (el nombre del servicio), no "localhost".
       # Docker Compose crea una red interna donde los servicios se resuelven por nombre.
       DB_HOST: db
-      DB_PORT: ${DB_PORT:-5432}
-      DB_USER: ${POSTGRES_USER:-todo_user}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-todo_pass}
-      DB_NAME: ${POSTGRES_DB:-todo_db}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      FRONTEND_URL: ${FRONTEND_URL}
     ports:
       - "3000:3000"
     depends_on:
