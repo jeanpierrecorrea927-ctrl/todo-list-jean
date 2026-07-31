@@ -3,20 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>To-Do List | DevOps</title>
-  <link rel="stylesheet" href="style.css?v=3">
+
+  <link rel="stylesheet" href="style.css?v=4">
+
   <style>
+    html,
     body {
-      background: #000000 !important;
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background-color: #000000 !important;
       color: #ffffff !important;
     }
+
+    body {
+      min-height: 100vh;
+    }
+
     .app {
-      background: #1a1a1a !important;
+      min-height: 100vh;
+      background-color: #000000 !important;
+      color: #ffffff;
+    }
+
+    input {
+      background-color: #1a1a1a;
+      color: #ffffff;
+      border: 1px solid #444444;
+    }
+
+    input::placeholder {
+      color: #aaaaaa;
     }
   </style>
 </head>
+
 <body>
   <div class="app">
+
     <header class="app-header">
       <h1>📝 To-Do List</h1>
       <p class="subtitle">Despliegue Automatizado en VPS</p>
@@ -24,21 +50,49 @@
 
     <section class="task-form-section">
       <form id="task-form">
-        <input type="text" id="title-input" placeholder="Título de la tarea" required>
-        <input type="text" id="description-input" placeholder="Descripción (opcional)">
-        <button type="submit" id="submit-btn">Agregar</button>
-        <button type="button" id="cancel-edit-btn" class="hidden">Cancelar</button>
+        <input
+          type="text"
+          id="title-input"
+          placeholder="Título de la tarea"
+          required
+        >
+
+        <input
+          type="text"
+          id="description-input"
+          placeholder="Descripción (opcional)"
+        >
+
+        <button type="submit" id="submit-btn">
+          Agregar
+        </button>
+
+        <button
+          type="button"
+          id="cancel-edit-btn"
+          class="hidden"
+        >
+          Cancelar
+        </button>
       </form>
     </section>
 
     <section class="filter-section">
-      <input type="text" id="filter-input" placeholder="🔍 Filtrar tareas en tiempo real...">
+      <input
+        type="text"
+        id="filter-input"
+        placeholder="🔍 Filtrar tareas en tiempo real..."
+      >
     </section>
 
     <section class="tasks-section">
       <ul id="task-list"></ul>
-      <p id="empty-state" class="hidden">No hay tareas todavía.</p>
+
+      <p id="empty-state" class="hidden">
+        No hay tareas todavía.
+      </p>
     </section>
+
   </div>
 
   <script src="app.js"></script>
