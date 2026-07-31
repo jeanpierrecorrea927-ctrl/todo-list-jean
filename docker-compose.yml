@@ -13,8 +13,8 @@ services:
       # Se ejecuta UNA sola vez, al crear el volumen por primera vez,
       # para crear la tabla "tasks" automáticamente (equivalente a tu schema.sql)
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
-    ports:
-      - "5432:5432"
+    # No exponemos el puerto 5432 al host porque ya hay PostgreSQL instalado en el sistema
+    # El contenedor de la app se comunica con la db a través de la red interna de Docker
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-todo_user} -d ${POSTGRES_DB:-todo_db}"]
       interval: 5s
